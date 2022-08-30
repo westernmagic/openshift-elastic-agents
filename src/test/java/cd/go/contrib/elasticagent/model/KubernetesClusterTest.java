@@ -17,8 +17,6 @@
 package cd.go.contrib.elasticagent.model;
 
 import cd.go.contrib.elasticagent.Constants;
-import io.fabric8.kubernetes.api.model.Node;
-import io.fabric8.kubernetes.api.model.NodeList;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -36,9 +34,6 @@ import static org.mockito.Mockito.*;
 public class KubernetesClusterTest {
 
     @Mock
-    private NonNamespaceOperation<Node, NodeList, Resource<Node>> nodes;
-
-    @Mock
     private MixedOperation<Pod, PodList, PodResource<Pod>> pods;
 
     @BeforeEach
@@ -50,16 +45,10 @@ public class KubernetesClusterTest {
     public void shouldCreateKubernetesClusterObject() throws Exception {
         final KubernetesClient kubernetesClient = mock(KubernetesClient.class);
 
-        when(nodes.list()).thenReturn(new NodeList());
-        when(kubernetesClient.nodes()).thenReturn(nodes);
-
         when(pods.withLabel(Constants.CREATED_BY_LABEL_KEY, Constants.PLUGIN_ID)).thenReturn(pods);
         when(pods.list()).thenReturn(new PodList());
         when(kubernetesClient.pods()).thenReturn(pods);
 
         final KubernetesCluster cluster = new KubernetesCluster(kubernetesClient);
-
-        verify(kubernetesClient, times(1)).nodes();
-        verify(kubernetesClient, times(1)).pods();
     }
 }

@@ -29,36 +29,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class KubernetesCluster {
-    private final List<KubernetesNode> nodes;
     private final String pluginId;
 
     public KubernetesCluster(KubernetesClient client) throws ParseException {
         pluginId = Constants.PLUGIN_ID;
-        nodes = client.nodes().list().getItems().stream().map(node -> new KubernetesNode(node)).collect(toList());
-        LOG.info("Running kubernetes nodes " + nodes.size());
-        fetchPods(client);
-    }
-
-    private void fetchPods(KubernetesClient dockerClient) throws ParseException {
-        final Map<String, KubernetesNode> dockerNodeMap = nodes.stream().distinct().collect(toMap(KubernetesNode::getName, node -> node));
-
-        final List<Pod> pods = dockerClient.pods()
-                .withLabel(Constants.CREATED_BY_LABEL_KEY, Constants.PLUGIN_ID)
-                .list().getItems();
-
-        LOG.info("Running pods " + pods.size());
-
-        for (Pod pod : pods) {
-            final KubernetesPod kubernetesPod = new KubernetesPod(pod);
-            final KubernetesNode kubernetesNode = dockerNodeMap.get(kubernetesPod.getNodeName());
-            if (kubernetesNode != null) {
-                kubernetesNode.add(kubernetesPod);
-            }
-        }
-    }
-
-    public List<KubernetesNode> getNodes() {
-        return nodes;
     }
 
     public String getPluginId() {
